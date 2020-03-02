@@ -1,0 +1,69 @@
+<!doctype html>
+<html ng-app="calendar.app">
+
+<head>
+    <title>Stellic Calendar App</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.3.0.js"></script>
+    <script src="../scripts/controllers/datepickerCtrl.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">    
+    
+    <style type="text/css">
+
+        input[type=text] {
+          padding: 12px;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          height: 12px;
+          resize: vertical;
+        }
+
+        label {
+          padding: 12px 5px 12px 12px;
+          display: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+
+<div ng-controller="DatepickerDemoCtrl">
+    <div align="center";>
+        <h4>Reservation Calendar</h4>
+        <uib-datepicker  style="min-height: 200px" ng-model="selectedDate" datepicker-options="datePickerConfig"></uib-datepicker>
+        <br/>
+        <button type="button" class="btn btn-sm btn-info" ng-click="today()">Today</button>
+        <button type="button" class="btn btn-sm btn-danger" ng-click="clear()">Clear</button>
+    </div>
+    <hr>
+    <div align="center"; ng-if="!isRervationExist() && selectedDate">
+        <div style="border-width: medium; border-style: ridge; width: 400px; height: 150px">
+            <div>
+                <label>Tenant Name:</label> <input placeholder="Enter tenant name">
+            </div>
+            <div>
+                <label>Stay date:- <span>{{selectedDate | date:'fullDate' }}</span></label> 
+            </div>
+            <div>
+                <button class="btn btn-info" ng-click="confirmReservation()">Confirm Stay</button>    
+            </div>
+        </div>
+    </div>
+    <div align="center"; ng-if="isRervationExist()">
+        <div style="border-width: medium; border-style: ridge; width: 400px; height: 150px">
+            <div>
+                <label>Tenant Name: <span>Mohsin</span></label>
+            </div>
+            <div>
+                <label>Stay date:- <span>{{selectedDate | date:'fullDate' }}</span></label> 
+            </div>
+            <div>
+                <button class="btn btn-danger" ng-click="cancelReservation()">Cancel Stay</button>    
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
