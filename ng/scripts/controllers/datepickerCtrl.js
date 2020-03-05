@@ -1,28 +1,58 @@
 angular.module('calendar.app', ['ngAnimate', 'ui.bootstrap']);
-angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope) {
+
+angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope, utilService) {
+  'use strict';
+
+  $scope.__cname = 'DatepickerDemoCtrl';
+  var model = {
+    tenantName: '',
+    selectedDate: null,
+    isReservationExist: false
+  };
 
   function today() {
-    $scope.selectedDate = new Date();
+    model.selectedDate = new Date();
   }
 
   function clear() {
-     $scope.selectedDate = null;
+    model.selectedDate = null;
   }
 
-  function confirmReservation() {
+  function confirmOrCancelReservation(isReserving) {
+    var tenantObj = {
+      tenantName: model.tenantName,
+      date: model.selectedDate,
+      reserved: isReserving
+    };
 
+    utilService.confirmOrCancelReservation(tenantObj).then(function () {
+      model.isReservationExist = isReserving;
+      if (!model.isReservationExist) {
+        model.tenantName = null;
+        model.selectedDate = null;
+      } else {
+        model.tenantName = tenantObj.tenantName;
+      }
+    });
   }
 
-  function cancelReservation() {
+  $scope.$watch('model.selectedDate', function (newVal, oldVal) {
+      if (newVal === oldVal) {
+        return;
+      } else {
+        model.isReservationExist = false;
+        utilService.isDateReserved(newVal).then(function (tenantObj){
+          model.isReservationExist = tenantObj.isDateReserved;
+          if (tenantObj.isDateReserved) {
+            model.tenantName = tenantObj.tenantName;
+          }
+        });
+      }
+  });
 
-  }
-
-  function isRervationExist() {
-    return false;
-  }
+  $scope.model = model;
 
   function initialize() {
-    $scope.selectedDate = null;
     $scope.datePickerConfig = {
       minDate: new Date(),
       showWeeks: true
@@ -31,9 +61,7 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
 
   initialize();
 
-  $scope.isRervationExist = isRervationExist;
-  $scope.confirmReservation = confirmReservation;
-  $scope.cancelReservation = cancelReservation;
+  $scope.confirmOrCancelReservation = confirmOrCancelReservation;
   $scope.today = today;
   $scope.clear = clear;
 });
