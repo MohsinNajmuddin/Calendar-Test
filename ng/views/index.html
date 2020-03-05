@@ -25,6 +25,21 @@
           display: inline-block;
         }
 
+        .box {
+            border-width: medium;
+            border-style: ridge;
+            width: 400px;
+            height: 170px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .datePicker {
+            min-height: 200px;
+        }
+
     </style>
 </head>
 <body>
@@ -32,14 +47,14 @@
 <div id="appRoot" ng-controller="DatepickerDemoCtrl">
     <div align="center";>
         <h4>Reservation Calendar</h4>
-        <uib-datepicker  style="min-height: 200px" ng-model="model.selectedDate" datepicker-options="datePickerConfig"></uib-datepicker>
+        <uib-datepicker class="datePicker" ng-model="model.selectedDate" datepicker-options="datePickerConfig"></uib-datepicker>
         <br/>
         <button type="button" class="btn btn-sm btn-info" ng-click="today()">Today</button>
         <button type="button" class="btn btn-sm btn-danger" ng-click="clear()">Clear</button>
     </div>
     <hr>
-    <div align="center"; ng-if="!model.isReservationExist && model.selectedDate">
-        <div style="border-width: medium; border-style: ridge; width: 400px; height: 150px">
+    <div align="center"; ng-if="!model.isReservationExist && model.selectedDate && !model.isLoading">
+        <div class="box">
             <div>
                 <label>Tenant Name:</label> <input type="text" placeholder="Enter tenant name" ng-model="model.tenantName"/>
             </div>
@@ -49,10 +64,13 @@
             <div>
                 <button class="btn btn-info" ng-click="confirmOrCancelReservation(true)" ng-disabled="!model.tenantName.length">Confirm Stay</button>
             </div>
+            <div ng-if="model.errorMessage">
+                <label class="error">{{ model.errorMessage }}</label>
+            </div>
         </div>
     </div>
     <div align="center"; ng-if="model.isReservationExist">
-        <div style="border-width: medium; border-style: ridge; width: 400px; height: 150px">
+        <div class="box">
             <div>
                 <label>Tenant Name: <span>{{ model.tenantName }}</span></label>
             </div>
@@ -61,6 +79,9 @@
             </div>
             <div>
                 <button class="btn btn-danger" ng-click="confirmOrCancelReservation(false)">Cancel Stay</button>
+            </div>
+            <div ng-if="model.errorMessage">
+                <label class="error">{{ model.errorMessage }}</label>
             </div>
         </div>
     </div>

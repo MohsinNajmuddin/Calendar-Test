@@ -7,7 +7,9 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
   var model = {
     tenantName: '',
     selectedDate: null,
-    isReservationExist: false
+    isReservationExist: false,
+    errorMessage: '',
+    isLoading: false
   };
 
   function today() {
@@ -26,7 +28,6 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
       date: model.selectedDate,
       reserved: isReserving
     };
-
     utilService.confirmOrCancelReservation(tenantObj).then(function () {
       model.isReservationExist = isReserving;
       if (!model.isReservationExist) {
@@ -35,6 +36,8 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
       } else {
         model.tenantName = tenantObj.tenantName;
       }
+    }, function (message) {
+       model.errorMessage = message;
     });
   }
 
@@ -42,13 +45,19 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
       if (newVal === oldVal) {
         return;
       } else if (!!newVal) {
+        model.errorMessage = '';
         model.tenantName = '';
         model.isReservationExist = false;
+        model.isLoading = true;
         utilService.isDateReserved(newVal).then(function (tenantObj){
           model.isReservationExist = tenantObj.isDateReserved;
           if (tenantObj.isDateReserved) {
             model.tenantName = tenantObj.tenantName;
           }
+        }, function (message) {
+          model.errorMessage = message;
+        })['finally'](function () {
+          model.isLoading = false;
         });
       }
   });
@@ -62,9 +71,9 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
     };
   }
 
-  initialize();
-
   $scope.confirmOrCancelReservation = confirmOrCancelReservation;
   $scope.today = today;
   $scope.clear = clear;
+
+  initialize();
 });

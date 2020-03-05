@@ -62,8 +62,7 @@ angular.module('calendar.app').factory('utilService', function ($q, $http) {
         };
 
         var onError = function (data, status, headers, config) {
-            // incase call failed
-            return '';
+             deferred.reject('Could not verify slot availability');
         }
 
         var URL = BASE_URL + 'reserve/' + dayObj.start +'/' + dayObj.end;
@@ -90,7 +89,7 @@ angular.module('calendar.app').factory('utilService', function ($q, $http) {
         };
 
         var onError = function (data, status, headers, config) {
-
+            deferred.reject(data);
         }
 
         var timeStamp = getDateInUnixTimeStamp(tenantObj.date);
