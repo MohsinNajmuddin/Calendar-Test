@@ -16,6 +16,8 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
 
   function clear() {
     model.selectedDate = null;
+    model.tenantName = '';
+    model.isReservationExist = false;
   }
 
   function confirmOrCancelReservation(isReserving) {
@@ -39,7 +41,8 @@ angular.module('calendar.app').controller('DatepickerDemoCtrl', function ($scope
   $scope.$watch('model.selectedDate', function (newVal, oldVal) {
       if (newVal === oldVal) {
         return;
-      } else {
+      } else if (!!newVal) {
+        model.tenantName = '';
         model.isReservationExist = false;
         utilService.isDateReserved(newVal).then(function (tenantObj){
           model.isReservationExist = tenantObj.isDateReserved;

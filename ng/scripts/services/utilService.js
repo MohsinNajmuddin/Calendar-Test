@@ -11,36 +11,52 @@ angular.module('calendar.app').factory('utilService', function ($q, $http) {
         return unixTimeStamp;
     }
 
-    function parseResponse(data) {
+    function parseResponse(data, key) {
         if (data.length) {
             var reservationObj = data[0];
-            me.reservedDates[reservationObj.time] = reservationObj.tennantName;
+            me.reservedDates[key] = reservationObj.tennantName;
         }
+    }
+
+    function getStatAndEndDateTimeStamp(date) {
+        date.setHours(0,0,0,0);
+        var dayStarttimeStamp = getDateInUnixTimeStamp(date);
+        date.setHours(23,59,59,999);
+        var dayEndtimeStamp = getDateInUnixTimeStamp(date);
+
+        var dayObj = {
+            start: dayStarttimeStamp,
+            end: dayEndtimeStamp
+        }
+
+        return dayObj;
     }
 
     function isDateReserved(date) {
         var deferred = $q.defer();
+        var dayObj = getStatAndEndDateTimeStamp(date);
 
-        var timeStamp = getDateInUnixTimeStamp(date);
         var tenantObj = {};
         var config = {
             headers : {'Accept' : 'application/json'}
         };
 
-        if (me.reservedDates[timeStamp]) {
+        var key = dayObj.start + ',' + dayObj.end;
+
+        if (me.reservedDates[key]) {
             tenantObj = {
                 isDateReserved: true,
-                tenantName: me.reservedDates[timeStamp]
+                tenantName: me.reservedDates[key]
             };
             deferred.resolve(tenantObj);
             return deferred.promise;
         }
 
         var onSuccess = function (data, status, headers, config) {
-            parseResponse(data.reserved);
+            parseResponse(data.reserved, key);
             tenantObj = {
-                isDateReserved: (!!me.reservedDates[timeStamp]),
-                tenantName: me.reservedDates[timeStamp]
+                isDateReserved: (!!me.reservedDates[key]),
+                tenantName: me.reservedDates[key]
             };
             deferred.resolve(tenantObj);
         };
@@ -50,7 +66,7 @@ angular.module('calendar.app').factory('utilService', function ($q, $http) {
             return '';
         }
 
-        var URL = BASE_URL + 'reserve/' + '1583348400' +'/' + '1585594800';
+        var URL = BASE_URL + 'reserve/' + dayObj.start +'/' + dayObj.end;
         $http.get(URL, config).success(onSuccess).error(onError);
 
         return deferred.promise;
@@ -58,21 +74,26 @@ angular.module('calendar.app').factory('utilService', function ($q, $http) {
 
     function confirmOrCancelReservation(tenantObj) {
         var deferred = $q.defer();
-        var timeStamp = getDateInUnixTimeStamp(tenantObj.date);
+        var dayObj = getStatAndEndDateTimeStamp(tenantObj.date);
+
+        var key = dayObj.start + ',' + dayObj.end;
 
         var onSuccess = function (data, status, headers, config) {
             if (data.success) {
                 if (tenantObj.reserved) {
-                    me.reservedDates[timeStamp] = tenantObj.tenantName;
+                    me.reservedDates[key] = tenantObj.tenantName;
                 } else {
-                    delete me.reservedDates[timeStamp];
+                    delete me.reservedDates[key];
                 }
             }
             deferred.resolve(); 
         };
 
         var onError = function (data, status, headers, config) {
+
         }
+
+        var timeStamp = getDateInUnixTimeStamp(tenantObj.date);
 
         var postReq = {
             headers : {'Accept' : 'application/json'},
